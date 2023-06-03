@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import numpy as np
 
@@ -86,5 +87,17 @@ def predictionModel(dataSrc, name):
     plt.plot(train_data["Close"])
     plt.plot(valid_data[['Close',"Predictions"]])
 
-predictionModel("./BTC-USD.csv", "btc")
-predictionModel("./ETH-USD.csv", "eth")
+keyword = '-USD.csv'
+filesDir = []
+for fname in os.listdir('./'):
+    if keyword in fname:
+        fileDir = './' + fname
+        filesDir.append(fileDir)
+
+for dir in filesDir:
+    coinName = dir[2:5]
+    predictionModel(dir, coinName.lower())    
+
+
+# predictionModel("./BTC-USD.csv", "btc")
+# predictionModel("./ETH-USD.csv", "eth")

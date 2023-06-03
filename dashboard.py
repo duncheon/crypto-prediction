@@ -12,9 +12,10 @@ app = dash.Dash()
 server = app.server
 scaler=MinMaxScaler(feature_range=(0,1))
 
+
 df_BTC = pd.read_csv("./BTC-USD.csv")
 df_ETH = pd.read_csv("./ETH-USD.csv")
-
+df_ADA = pd.read_csv('./ADA-USD.csv')
 
 def prediction(df, modelSrc):
     df["Date"]=pd.to_datetime(df.Date,format="%Y-%m-%d")
@@ -68,9 +69,9 @@ def prediction(df, modelSrc):
 
 train_BTC, valid_BTC = prediction(df_BTC, "./lstm_btc.h5")
 train_ETH, valid_ETH = prediction(df_ETH, "./lstm_eth.h5")
+train_ADA, valid_ADA = prediction(df_ADA, "./lstm_ada.h5")
 
-
-df = pd.concat([pd.read_csv("./coin_Bitcoin.csv"), pd.read_csv("./coin_Ethereum.csv")],ignore_index=True)
+df = pd.concat([pd.read_csv("./coin_Bitcoin.csv"), pd.read_csv("./coin_Ethereum.csv"), pd.read_csv("./coin_Cardano.csv")],ignore_index=True)
 
 df['SNo'] = df.index
 
@@ -86,7 +87,8 @@ app.layout = html.Div([
             html.Div([
                 dcc.Dropdown(id='my-dropdown1',
                              options=[{'label': 'Bitcoin', 'value': 'BTC'},
-                                      {'label': 'Etherium','value': 'ETH'}], 
+                                      {'label': 'Etherium','value': 'ETH'},
+                                      {'label': 'Cardano', 'value': 'ADA'}], 
                              multi=False,value='BTC',
                              style={"display": "block", "margin-left": "auto", 
                                     "margin-right": "auto", "width": "60%"}),
@@ -135,7 +137,8 @@ app.layout = html.Div([
               
                 dcc.Dropdown(id='my-dropdown2',
                              options=[{'label': 'Bitcoin', 'value': 'BTC'},
-                                      {'label': 'ETH','value': 'ETH'}], 
+                                      {'label': 'Etherium','value': 'ETH'},
+                                      {'label': 'Cardano','value': 'ADA'}], 
                              multi=True,value=['BTC'],
                              style={"display": "block", "margin-left": "auto", 
                                     "margin-right": "auto", "width": "60%"}),
@@ -144,7 +147,8 @@ app.layout = html.Div([
          
                 dcc.Dropdown(id='my-dropdown3',
                          options=[{'label': 'Bitcoin', 'value': 'BTC'},
-                                      {'label': 'ETH','value': 'ETH'}], 
+                                      {'label': 'Etherium','value': 'ETH'},
+                                       {'label': 'Cardano','value': 'ADA'}], 
                              multi=True,value=['BTC'],
                              style={"display": "block", "margin-left": "auto", 
                                     "margin-right": "auto", "width": "60%"}),
@@ -156,7 +160,7 @@ app.layout = html.Div([
 @app.callback(Output('highlow', 'figure'),
               [Input('my-dropdown2', 'value')])
 def update_graph(selected_dropdown):
-    dropdown = {"BTC": "Bitcoin","ETH": "Etherium",}
+    dropdown = {"BTC": "Bitcoin","ETH": "Etherium","ADA": "Cardano"}
     trace1 = []
     trace2 = []
     for stock in selected_dropdown:
@@ -191,7 +195,7 @@ def update_graph(selected_dropdown):
 @app.callback(Output('volume', 'figure'),
               [Input('my-dropdown3', 'value')])
 def update_graph(selected_dropdown_value):
-    dropdown = {"BTC": "Bitcoin","ETH": "Etherium",}
+    dropdown = {"BTC": "Bitcoin","ETH": "Etherium","ADA": "Cardano"}
     trace1 = []
     for stock in selected_dropdown_value:
         trace1.append(
@@ -230,23 +234,26 @@ def update_graph(selected_dropdown_value):
         case "ETH":
             valid = valid_ETH
             train = train_ETH
+        case "ADA":
+            valid = valid_ADA
+            train = train_ADA
         case _:
             valid = []
 
     figure={
-                        "data":[
-                            go.Scatter(
-                                x=train.index,
-                                y=valid["Close"],
-                                mode='markers'
-                            )
-                        ],
-                        "layout":go.Layout(
-                            title='scatter plot',
-                            xaxis={'title':'Date'},
-                            yaxis={'title':'Closing Rate'}
-                        )
-                    }
+                "data":[
+                    go.Scatter(
+                        x=train.index,
+                        y=valid["Close"],
+                        mode='markers'
+                    )
+                ],
+                "layout":go.Layout(
+                    title='scatter plot',
+                    xaxis={'title':'Date'},
+                    yaxis={'title':'Closing Rate'}
+                )
+            }
     return figure
 
 @app.callback(Output('Predicted Data', 'figure'),
@@ -258,23 +265,25 @@ def update_graph(selected_dropdown_value):
             valid = valid_BTC
         case "ETH":
             valid = valid_ETH
+        case "ADA":
+            valid = valid_ADA
         case _:
             valid = []
 
     figure={ 
-        "data":[
-                            go.Scatter(
-                                x=valid.index,
-                                y=valid["Predictions"],
-                                mode='markers'
-                            )
-                        ],
-                        "layout":go.Layout(
-                            title='scatter plot',
-                            xaxis={'title':'Date'},
-                            yaxis={'title':'Closing Rate'}
-                        )
-                    }
+               "data":[
+                    go.Scatter(
+                        x=valid.index,
+                        y=valid["Predictions"],
+                        mode='markers'
+                    )
+                    ],
+                    "layout":go.Layout(
+                        title='scatter plot',
+                        xaxis={'title':'Date'},
+                        yaxis={'title':'Closing Rate'}
+                    )
+            }
     return figure
 
 
