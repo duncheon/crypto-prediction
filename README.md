@@ -18,3 +18,7 @@
 - python prediction.py
 - python dashboard.py
 - Open localhost:8050 in browser
+
+## Video demo
+
+- [Video](https://youtu.be/aiESvbKYulM)
